@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务记录统计分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a73e8 0%, #6c8ef5 100%);
+            color: white;
+            padding: 25px 30px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: #f9fafc;
+            border-right: 1px solid #eaeaea;
+            padding: 20px;
+        }
+        
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: #1a73e8;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 13px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        
+        .input-with-button {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .input-with-button .form-control {
+            flex: 1;
+        }
+        
+        .btn-input {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            font-size: 13px;
+        }
+        
+        .btn-input:hover {
+            background-color: #0d62d9;
+        }
+        
+        .date-range {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .date-range span {
+            color: #777;
+            text-align: center;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0d62d9;
+        }
+        
+        .btn-secondary {
+            background-color: #f1f3f4;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e3e6e8;
+        }
+        
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .statistics-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .summary-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            flex: 1;
+            min-width: 180px;
+            border-left: 4px solid #1a73e8;
+        }
+        
+        .summary-card.department {
+            border-left-color: #34a853;
+        }
+        
+        .summary-card.operator {
+            border-left-color: #9c27b0;
+        }
+        
+        .summary-card.records {
+            border-left-color: #fbbc04;
+        }
+        
+        .summary-card.empty {
+            border-left-color: #ea4335;
+        }
+        
+        .summary-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .summary-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a73e8;
+        }
+        
+        .summary-card.department .summary-value {
+            color: #34a853;
+        }
+        
+        .summary-card.operator .summary-value {
+            color: #9c27b0;
+        }
+        
+        .summary-card.records .summary-value {
+            color: #fbbc04;
+        }
+        
+        .summary-card.empty .summary-value {
+            color: #ea4335;
+        }
+        
+        .statistics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        
+        .statistics-table th {
+            background-color: #f1f3f4;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #ddd;
+            font-size: 13px;
+        }
+        
+        .statistics-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .statistics-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .percentage-cell {
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .percentage-high {
+            color: #34a853;
+        }
+        
+        .percentage-medium {
+            color: #fbbc04;
+        }
+        
+        .percentage-low {
+            color: #ea4335;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: #777;
+            font-size: 14px;
+        }
+        
+        .no-data i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        /* 树形选择模态框样式 */
+        .tree-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            background-color: #1a73e8;
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 20px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        
+        .close-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .modal-body {
+            padding: 20px;
+            font-size: 13px;
+        }
+        
+        /* 树形结构样式 */
+        .tree-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        .tree-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .tree-list ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .tree-item {
+            padding: 7px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 13px;
+        }
+        
+        .tree-item:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .tree-item.selected {
+            background-color: #e3f2fd;
+            font-weight: 600;
+            color: #1a73e8;
+        }
+        
+        .tree-item .toggle {
+            display: inline-block;
+            width: 18px;
+            text-align: center;
+            margin-right: 5px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .tree-item .icon {
+            display: inline-block;
+            width: 18px;
+            text-align: center;
+            margin-right: 5px;
+            font-size: 13px;
+        }
+        
+        .tree-search {
+            margin-bottom: 15px;
+        }
+        
+        .tree-search input {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #eaeaea;
+            }
+            
+            .statistics-summary {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .statistics-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .date-range {
+                flex-direction: column;
+            }
+            
+            .input-with-button {
+                flex-direction: column;
+            }
+            
+            .input-with-button .btn-input {
+                width: 100%;
+                padding: 9px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>服务记录统计分析</h1>
+            <p>按部门或操作员统计服务记录情况</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <h2 class="section-title">查询条件</h2>
+                
+                <div class="form-group">
+                    <label for="address">地址</label>
+                    <div class="input-with-button">
+                        <input type="text" id="address" class="form-control" placeholder="点击选择地址" readonly>
+                        <button class="btn-input" onclick="showTreeModal('address')">选择</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">操作员部门</label>
+                    <div class="input-with-button">
+                        <input type="text" id="department" class="form-control" placeholder="点击选择部门" readonly>
+                        <button class="btn-input" onclick="showTreeModal('department')">选择</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="operator">操作员</label>
+                    <div class="input-with-button">
+                        <input type="text" id="operator" class="form-control" placeholder="点击选择操作员" readonly>
+                        <button class="btn-input" onclick="showTreeModal('operator')">选择</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dateRange">统计时间段</label>
+                    <div class="date-range">
+                        <input type="date" id="startDate" class="form-control" value="2025-10-01">
+                        <span>至</span>
+                        <input type="date" id="endDate" class="form-control" value="2025-10-31">
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary btn-block" onclick="queryStatistics()">查询统计</button>
+                    <button class="btn btn-secondary btn-block" onclick="resetForm()">重置条件</button>
+                </div>
+            </div>
+            
+            <div class="content">
+                <h2 class="section-title">统计结果</h2>
+                
+                <div class="statistics-summary" id="statisticsSummary">
+                    <!-- 统计摘要信息将在这里动态生成 -->
+                </div>
+                
+                <div class="table-container">
+                    <table class="statistics-table" id="departmentTable">
+                        <thead>
+                            <tr>
+                                <th>部门</th>
+                                <th>受理单客户数</th>
+                                <th>有服务留痕数</th>
+                                <th>无服务留痕数</th>
+                                <th>服务留痕率</th>
+                                <th>平均服务时长</th>
+                            </tr>
+                        </thead>
+                        <tbody id="departmentBody">
+                            <!-- 部门统计数据将在这里动态生成 -->
+                        </tbody>
+                    </table>
+                    
+                    <table class="statistics-table" id="operatorTable" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>部门</th>
+                                <th>操作员</th>
+                                <th>受理单客户数</th>
+                                <th>有服务留痕数</th>
+                                <th>无服务留痕数</th>
+                                <th>服务留痕率</th>
+                                <th>平均服务时长</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operatorBody">
+                            <!-- 操作员统计数据将在这里动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="no-data" id="noDataMessage">
+                    <div>📊</div>
+                    <h3>暂无统计数据</h3>
+                    <p>请设置查询条件并点击"查询统计"按钮查看结果</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 树形选择模态框 -->
+    <div class="tree-modal" id="treeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="treeModalTitle">选择</h2>
+                <button class="close-btn" onclick="closeModal('treeModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tree-search">
+                    <input type="text" id="treeSearch" placeholder="搜索..." onkeyup="filterTree()">
+                </div>
+                <div class="tree-container">
+                    <ul class="tree-list" id="treeList">
+                        <!-- 树形结构将在这里动态生成 -->
+                    </ul>
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button class="btn btn-secondary" onclick="closeModal('treeModal')">取消</button>
+                    <button class="btn btn-primary" onclick="confirmTreeSelection()" style="margin-left: 10px;">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟数据 - 统计相关数据
+        const mockStatisticsData = {
+            // 部门统计数据
+            departmentStats: [
+                {
+                    department: "和平河西分公司",
+                    totalOrders: 156,
+                    withRecords: 142,
+                    withoutRecords: 14,
+                    avgDuration: 85,
+                    operators: 8,
+                    recordRate: 67.0
+                },
+                {
+                    department: "滨海分公司",
+                    totalOrders: 203,
+                    withRecords: 188,
+                    withoutRecords: 15,
+                    avgDuration: 92,
+                    operators: 12,
+                    recordRate: 92.6
+                },
+                {
+                    department: "城西分公司",
+                    totalOrders: 134,
+                    withRecords: 121,
+                    withoutRecords: 13,
+                    avgDuration: 78,
+                    operators: 9,
+                    recordRate: 45.3
+                },
+                {
+                    department: "宁河分公司",
+                    totalOrders: 87,
+                    withRecords: 82,
+                    withoutRecords: 5,
+                    avgDuration: 95,
+                    operators: 6,
+                    recordRate: 94.3
+                },
+                {
+                    department: "东丽分公司",
+                    totalOrders: 112,
+                    withRecords: 105,
+                    withoutRecords: 7,
+                    avgDuration: 88,
+                    operators: 7,
+                    recordRate: 93.8
+                },
+                {
+                    department: "北辰分公司",
+                    totalOrders: 95,
+                    withRecords: 86,
+                    withoutRecords: 9,
+                    avgDuration: 81,
+                    operators: 8,
+                    recordRate: 45.5
+                }
+            ],
+            
+            // 操作员统计数据
+            operatorStats: [
+                {
+                    department: "和平河西分公司",
+                    operator: "张三 (520111xlx)",
+                    totalOrders: 42,
+                    withRecords: 40,
+                    withoutRecords: 2,
+                    avgDuration: 87,
+                    recordRate: 95.2
+                },
+                {
+                    department: "和平河西分公司",
+                    operator: "李丽 (520115ll)",
+                    totalOrders: 38,
+                    withRecords: 36,
+                    withoutRecords: 2,
+                    avgDuration: 83,
+                    recordRate: 94.7
+                },
+                {
+                    department: "和平河西分公司",
+                    operator: "王明 (520116wm)",
+                    totalOrders: 32,
+                    withRecords: 30,
+                    withoutRecords: 2,
+                    avgDuration: 85,
+                    recordRate: 93.8
+                },
+                {
+                    department: "滨海分公司",
+                    operator: "赵刚 (520117zg)",
+                    totalOrders: 48,
+                    withRecords: 46,
+                    withoutRecords: 2,
+                    avgDuration: 94,
+                    recordRate: 95.8
+                },
+                {
+                    department: "滨海分公司",
+                    operator: "刘芳 (520118lf)",
+                    totalOrders: 45,
+                    withRecords: 43,
+                    withoutRecords: 2,
+                    avgDuration: 90,
+                    recordRate: 95.6
+                },
+                {
+                    department: "滨海分公司",
+                    operator: "周涛 (520119zt)",
+                    totalOrders: 40,
+                    withRecords: 37,
+                    withoutRecords: 3,
+                    avgDuration: 95,
+                    recordRate: 92.5
+                },
+                {
+                    department: "城西分公司",
+                    operator: "吴华 (520120wh)",
+                    totalOrders: 38,
+                    withRecords: 35,
+                    withoutRecords: 3,
+                    avgDuration: 79,
+                    recordRate: 92.1
+                },
+                {
+                    department: "城西分公司",
+                    operator: "郑丽 (520121zl)",
+                    totalOrders: 36,
+                    withRecords: 33,
+                    withoutRecords: 3,
+                    avgDuration: 76,
+                    recordRate: 67.7
+                },
+                {
+                    department: "城西分公司",
+                    operator: "孙伟 (520122sw)",
+                    totalOrders: 32,
+                    withRecords: 29,
+                    withoutRecords: 3,
+                    avgDuration: 80,
+                    recordRate: 45.6
+                },
+                {
+                    department: "宁河分公司",
+                    operator: "钱勇 (520123qy)",
+                    totalOrders: 30,
+                    withRecords: 29,
+                    withoutRecords: 1,
+                    avgDuration: 97,
+                    recordRate: 96.7
+                },
+                {
+                    department: "宁河分公司",
+                    operator: "冯静 (520124fj)",
+                    totalOrders: 29,
+                    withRecords: 28,
+                    withoutRecords: 1,
+                    avgDuration: 92,
+                    recordRate: 96.6
+                },
+                {
+                    department: "东丽分公司",
+                    operator: "陈明 (520125cm)",
+                    totalOrders: 36,
+                    withRecords: 34,
+                    withoutRecords: 2,
+                    avgDuration: 86,
+                    recordRate: 94.4
+                },
+                {
+                    department: "东丽分公司",
+                    operator: "杨洋 (520126yy)",
+                    totalOrders: 34,
+                    withRecords: 33,
+                    withoutRecords: 1,
+                    avgDuration: 90,
+                    recordRate: 97.1
+                },
+                {
+                    department: "北辰分公司",
+                    operator: "朱军 (520127zj)",
+                    totalOrders: 32,
+                    withRecords: 29,
+                    withoutRecords: 3,
+                    avgDuration: 82,
+                    recordRate: 45.6
+                },
+                {
+                    department: "北辰分公司",
+                    operator: "秦芳 (520128qf)",
+                    totalOrders: 31,
+                    withRecords: 28,
+                    withoutRecords: 3,
+                    avgDuration: 80,
+                    recordRate: 45.3
+                }
+            ],
+            
+            // 地址相关的统计数据
+            addressStats: {
+                "南开区": {
+                    departmentStats: [
+                        {
+                            department: "和平河西分公司",
+                            totalOrders: 45,
+                            withRecords: 42,
+                            withoutRecords: 3,
+                            avgDuration: 82,
+                            recordRate: 93.3
+                        },
+                        {
+                            department: "城西分公司",
+                            totalOrders: 38,
+                            withRecords: 35,
+                            withoutRecords: 3,
+                            avgDuration: 79,
+                            recordRate: 92.1
+                        }
+                    ],
+                    operatorStats: [
+                        {
+                            department: "和平河西分公司",
+                            operator: "张三 (520111xlx)",
+                            totalOrders: 25,
+                            withRecords: 24,
+                            withoutRecords: 1,
+                            avgDuration: 85,
+                            recordRate: 96.0
+                        },
+                        {
+                            department: "城西分公司",
+                            operator: "吴华 (520120wh)",
+                            totalOrders: 22,
+                            withRecords: 20,
+                            withoutRecords: 2,
+                            avgDuration: 78,
+                            recordRate: 45.9
+                        }
+                    ]
+                },
+                "河西区": {
+                    departmentStats: [
+                        {
+                            department: "滨海分公司",
+                            totalOrders: 52,
+                            withRecords: 50,
+                            withoutRecords: 2,
+                            avgDuration: 91,
+                            recordRate: 96.2
+                        }
+                    ],
+                    operatorStats: [
+                        {
+                            department: "滨海分公司",
+                            operator: "赵刚 (520117zg)",
+                            totalOrders: 28,
+                            withRecords: 27,
+                            withoutRecords: 1,
+                            avgDuration: 92,
+                            recordRate: 96.4
+                        },
+                        {
+                            department: "滨海分公司",
+                            operator: "刘芳 (520118lf)",
+                            totalOrders: 24,
+                            withRecords: 23,
+                            withoutRecords: 1,
+                            avgDuration: 90,
+                            recordRate: 95.8
+                        }
+                    ]
+                },
+                "和平区": {
+                    departmentStats: [
+                        {
+                            department: "和平河西分公司",
+                            totalOrders: 48,
+                            withRecords: 45,
+                            withoutRecords: 3,
+                            avgDuration: 85,
+                            recordRate: 93.8
+                        }
+                    ],
+                    operatorStats: [
+                        {
+                            department: "和平河西分公司",
+                            operator: "李丽 (520115ll)",
+                            totalOrders: 26,
+                            withRecords: 25,
+                            withoutRecords: 1,
+                            avgDuration: 84,
+                            recordRate: 96.2
+                        },
+                        {
+                            department: "和平河西分公司",
+                            operator: "王明 (520116wm)",
+                            totalOrders: 22,
+                            withRecords: 20,
+                            withoutRecords: 2,
+                            avgDuration: 86,
+                            recordRate: 45.9
+                        }
+                    ]
+                },
+                "河东区": {
+                    departmentStats: [
+                        {
+                            department: "宁河分公司",
+                            totalOrders: 35,
+                            withRecords: 33,
+                            withoutRecords: 2,
+                            avgDuration: 89,
+                            recordRate: 94.3
+                        }
+                    ],
+                    operatorStats: [
+                        {
+                            department: "宁河分公司",
+                            operator: "钱勇 (520123qy)",
+                            totalOrders: 20,
+                            withRecords: 19,
+                            withoutRecords: 1,
+                            avgDuration: 88,
+                            recordRate: 95.0
+                        }
+                    ]
+                },
+                "河北区": {
+                    departmentStats: [
+                        {
+                            department: "北辰分公司",
+                            totalOrders: 42,
+                            withRecords: 38,
+                            withoutRecords: 4,
+                            avgDuration: 83,
+                            recordRate: 45.5
+                        }
+                    ],
+                    operatorStats: [
+                        {
+                            department: "北辰分公司",
+                            operator: "朱军 (520127zj)",
+                            totalOrders: 22,
+                            withRecords: 20,
+                            withoutRecords: 2,
+                            avgDuration: 82,
+                            recordRate: 45.9
+                        }
+                    ]
+                }
+            }
+        };
+
+        // 树形结构数据
+        const treeData = {
+            address: {
+                title: "选择地址",
+                items: [
+                    {
+                        id: "area1",
+                        name: "南开区",
+                        children: [
+                            { id: "area1-1", name: "南开区华苑街" },
+                            { id: "area1-2", name: "南开区学府街" },
+                            { id: "area1-3", name: "南开区水上公园街" }
+                        ]
+                    },
+                    {
+                        id: "area2",
+                        name: "河西区",
+                        children: [
+                            { id: "area2-1", name: "河西区下瓦房街" },
+                            { id: "area2-2", name: "河西区友谊路街" },
+                            { id: "area2-3", name: "河西区梅江街" }
+                        ]
+                    },
+                    {
+                        id: "area3",
+                        name: "和平区",
+                        children: [
+                            { id: "area3-1", name: "和平区劝业场街" },
+                            { id: "area3-2", name: "和平区五大道街" }
+                        ]
+                    },
+                    {
+                        id: "area4",
+                        name: "河东区",
+                        children: [
+                            { id: "area4-1", name: "河东区大王庄街" },
+                            { id: "area4-2", name: "河东区中山门街" }
+                        ]
+                    },
+                    {
+                        id: "area5",
+                        name: "河北区",
+                        children: [
+                            { id: "area5-1", name: "河北区光复道街" },
+                            { id: "area5-2", name: "河北区望海楼街" }
+                        ]
+                    }
+                ]
+            },
+            department: {
+                title: "选择部门",
+                items: [
+                    {
+                        id: "dept1",
+                        name: "和平河西分公司",
+                        children: [
+                            { id: "dept1-1", name: "和平河南路营业厅" },
+                            { id: "dept1-2", name: "河西利民道营业厅" }
+                        ]
+                    },
+                    {
+                        id: "dept2",
+                        name: "滨海分公司",
+                        children: [
+                            { id: "dept2-1", name: "塘沽上海道营业厅" },
+                            { id: "dept2-2", name: "大港永明路营业厅" },
+                            { id: "dept2-3", name: "汉沽营业厅" }
+                        ]
+                    },
+                    {
+                        id: "dept3",
+                        name: "城西分公司",
+                        children: [
+                            { id: "dept3-1", name: "西青营业厅" },
+                            { id: "dept3-2", name: "静海营业厅" }
+                        ]
+                    },
+                    {
+                        id: "dept4",
+                        name: "宁河分公司",
+                        children: [
+                            { id: "dept4-1", name: "宁河营业厅" }
+                        ]
+                    },
+                    {
+                        id: "dept5",
+                        name: "东丽分公司",
+                        children: [
+                            { id: "dept5-1", name: "东丽营业厅" }
+                        ]
+                    },
+                    {
+                        id: "dept6",
+                        name: "北辰分公司",
+                        children: [
+                            { id: "dept6-1", name: "北辰营业厅" }
+                        ]
+                    }
+                ]
+            },
+            operator: {
+                title: "选择操作员",
+                items: [
+                    {
+                        id: "op1",
+                        name: "和平河西分公司",
+                        children: [
+                            { id: "op1-1", name: "张三 (520111xlx)" },
+                            { id: "op1-2", name: "李丽 (520115ll)" },
+                            { id: "op1-3", name: "王明 (520116wm)" }
+                        ]
+                    },
+                    {
+                        id: "op2",
+                        name: "滨海分公司",
+                        children: [
+                            { id: "op2-1", name: "赵刚 (520117zg)" },
+                            { id: "op2-2", name: "刘芳 (520118lf)" },
+                            { id: "op2-3", name: "周涛 (520119zt)" }
+                        ]
+                    },
+                    {
+                        id: "op3",
+                        name: "城西分公司",
+                        children: [
+                            { id: "op3-1", name: "吴华 (520120wh)" },
+                            { id: "op3-2", name: "郑丽 (520121zl)" },
+                            { id: "op3-3", name: "孙伟 (520122sw)" }
+                        ]
+                    },
+                    {
+                        id: "op4",
+                        name: "宁河分公司",
+                        children: [
+                            { id: "op4-1", name: "钱勇 (520123qy)" },
+                            { id: "op4-2", name: "冯静 (520124fj)" }
+                        ]
+                    },
+                    {
+                        id: "op5",
+                        name: "东丽分公司",
+                        children: [
+                            { id: "op5-1", name: "陈明 (520125cm)" },
+                            { id: "op5-2", name: "杨洋 (520126yy)" }
+                        ]
+                    },
+                    {
+                        id: "op6",
+                        name: "北辰分公司",
+                        children: [
+                            { id: "op6-1", name: "朱军 (520127zj)" },
+                            { id: "op6-2", name: "秦芳 (520128qf)" }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // 全局变量
+        let currentTreeType = '';
+        let selectedTreeItem = null;
+
+        // 页面加载时显示默认统计数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 默认显示部门统计表格
+            document.getElementById('departmentTable').style.display = 'table';
+            document.getElementById('operatorTable').style.display = 'none';
+            
+            // 显示部门统计数据
+            displayDepartmentStats(mockStatisticsData.departmentStats);
+            updateSummaryStats(mockStatisticsData.departmentStats, 'department');
+        });
+
+        // 显示树形选择模态框
+        function showTreeModal(type) {
+            currentTreeType = type;
+            selectedTreeItem = null;
+            
+            document.getElementById('treeModalTitle').textContent = treeData[type].title;
+            document.getElementById('treeSearch').value = '';
+            generateTree(treeData[type].items);
+            document.getElementById('treeModal').style.display = 'flex';
+        }
+
+        // 生成树形结构
+        function generateTree(items, parentElement = null) {
+            const treeList = parentElement || document.getElementById('treeList');
+            treeList.innerHTML = '';
+            
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'tree-item';
+                li.dataset.id = item.id;
+                li.dataset.name = item.name;
+                
+                let html = '';
+                if (item.children && item.children.length > 0) {
+                    html = `
+                        <div>
+                            <span class="toggle" onclick="toggleTreeItem(this)">+</span>
+                            <span class="icon">📁</span>
+                            <span class="name">${item.name}</span>
+                        </div>
+                    `;
+                    
+                    li.innerHTML = html;
+                    
+                    // 创建子节点容器
+                    const childUl = document.createElement('ul');
+                    childUl.style.display = 'none';
+                    li.appendChild(childUl);
+                    
+                    // 为整个div添加点击事件（选择节点）
+                    li.querySelector('div').onclick = function(e) {
+                        // 如果点击的是toggle按钮，不触发选择
+                        if (e.target.classList.contains('toggle')) return;
+                        selectTreeItem(li);
+                    };
+                    
+                    // 递归生成子节点
+                    generateTree(item.children, childUl);
+                } else {
+                    html = `
+                        <div>
+                            <span class="toggle"></span>
+                            <span class="icon">📄</span>
+                            <span class="name">${item.name}</span>
+                        </div>
+                    `;
+                    li.innerHTML = html;
+                    
+                    li.querySelector('div').onclick = function() {
+                        selectTreeItem(li);
+                    };
+                }
+                
+                treeList.appendChild(li);
+            });
+        }
+
+        // 切换树形节点展开/折叠
+        function toggleTreeItem(toggleElement) {
+            const parentLi = toggleElement.closest('li');
+            const childUl = parentLi.querySelector('ul');
+            
+            if (childUl) {
+                if (childUl.style.display === 'none') {
+                    childUl.style.display = 'block';
+                    toggleElement.textContent = '-';
+                } else {
+                    childUl.style.display = 'none';
+                    toggleElement.textContent = '+';
+                }
+            }
+        }
+
+        // 选择树形节点
+        function selectTreeItem(itemElement) {
+            document.querySelectorAll('.tree-item.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            itemElement.classList.add('selected');
+            selectedTreeItem = {
+                id: itemElement.dataset.id,
+                name: itemElement.dataset.name
+            };
+        }
+
+        // 过滤树形节点
+        function filterTree() {
+            const searchText = document.getElementById('treeSearch').value.toLowerCase();
+            const treeItems = document.querySelectorAll('.tree-item');
+            
+            treeItems.forEach(item => {
+                const name = item.dataset.name.toLowerCase();
+                if (name.includes(searchText)) {
+                    item.style.display = '';
+                    
+                    let parent = item.parentElement;
+                    while (parent && parent.classList.contains('tree-list')) {
+                        const parentLi = parent.closest('li');
+                        if (parentLi) {
+                            const toggle = parentLi.querySelector('.toggle');
+                            if (toggle && toggle.textContent === '+') {
+                                toggleTreeItem(toggle);
+                            }
+                        }
+                        parent = parent.parentElement;
+                    }
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // 确认树形选择
+        function confirmTreeSelection() {
+            if (selectedTreeItem) {
+                if (currentTreeType === 'address') {
+                    document.getElementById('address').value = selectedTreeItem.name;
+                } else if (currentTreeType === 'department') {
+                    document.getElementById('department').value = selectedTreeItem.name;
+                } else if (currentTreeType === 'operator') {
+                    document.getElementById('operator').value = selectedTreeItem.name;
+                }
+                
+                closeModal('treeModal');
+            } else {
+                alert('请先选择一个选项');
+            }
+        }
+
+        // 查询统计数据
+        function queryStatistics() {
+            const address = document.getElementById('address').value;
+            const department = document.getElementById('department').value;
+            const operator = document.getElementById('operator').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            // 判断显示哪种统计
+            let showOperatorTable = false;
+            
+            if (operator) {
+                // 如果选择了操作员，显示操作员统计
+                showOperatorTable = true;
+                const filteredStats = filterOperatorStats(address, department, operator, startDate, endDate);
+                displayOperatorStats(filteredStats);
+                updateSummaryStats(filteredStats, 'operator');
+            } else if (department) {
+                // 如果选择了部门，显示部门统计
+                showOperatorTable = false;
+                const filteredStats = filterDepartmentStats(address, department, startDate, endDate);
+                displayDepartmentStats(filteredStats);
+                updateSummaryStats(filteredStats, 'department');
+            } else {
+                // 如果什么都没选，默认显示部门统计
+                showOperatorTable = false;
+                const filteredStats = filterDepartmentStats(address, '', startDate, endDate);
+                displayDepartmentStats(filteredStats);
+                updateSummaryStats(filteredStats, 'department');
+            }
+            
+            // 显示/隐藏对应的表格
+            if (showOperatorTable) {
+                document.getElementById('departmentTable').style.display = 'none';
+                document.getElementById('operatorTable').style.display = 'table';
+            } else {
+                document.getElementById('departmentTable').style.display = 'table';
+                document.getElementById('operatorTable').style.display = 'none';
+            }
+        }
+
+        // 筛选部门统计数据
+        function filterDepartmentStats(address, department, startDate, endDate) {
+            let stats = [...mockStatisticsData.departmentStats];
+            
+            // 如果有地址条件，筛选地址相关数据
+            if (address) {
+                // 检查是否为区级地址
+                const isDistrict = address.includes("区");
+                let districtName = address;
+                
+                if (isDistrict) {
+                    // 如果是"某某区"格式，提取区名
+                    districtName = address.replace("区", "");
+                    const addressData = mockStatisticsData.addressStats[districtName];
+                    
+                    if (addressData && addressData.departmentStats) {
+                        stats = addressData.departmentStats;
+                    }
+                }
+            }
+            
+            // 如果有部门条件，筛选部门
+            if (department) {
+                stats = stats.filter(stat => stat.department.includes(department));
+            }
+            
+            return stats;
+        }
+
+        // 筛选操作员统计数据
+        function filterOperatorStats(address, department, operator, startDate, endDate) {
+            let stats = [...mockStatisticsData.operatorStats];
+            
+            // 如果有地址条件，筛选地址相关数据
+            if (address) {
+                // 检查是否为区级地址
+                const isDistrict = address.includes("区");
+                let districtName = address;
+                
+                if (isDistrict) {
+                    // 如果是"某某区"格式，提取区名
+                    districtName = address.replace("区", "");
+                    const addressData = mockStatisticsData.addressStats[districtName];
+                    
+                    if (addressData && addressData.operatorStats) {
+                        stats = addressData.operatorStats;
+                    }
+                }
+            }
+            
+            // 如果有部门条件，筛选部门
+            if (department) {
+                stats = stats.filter(stat => stat.department.includes(department));
+            }
+            
+            // 如果有操作员条件，筛选操作员
+            if (operator) {
+                stats = stats.filter(stat => {
+                    return stat.operator.includes(operator.split(' ')[0]) || 
+                           stat.department.includes(operator);
+                });
+            }
+            
+            return stats;
+        }
+
+        // 显示部门统计数据
+        function displayDepartmentStats(stats) {
+            const departmentBody = document.getElementById('departmentBody');
+            const noDataMessage = document.getElementById('noDataMessage');
+            
+            if (stats.length === 0) {
+                departmentBody.innerHTML = '';
+                noDataMessage.style.display = 'block';
+                return;
+            }
+            
+            noDataMessage.style.display = 'none';
+            
+            let rowsHTML = '';
+            stats.forEach(stat => {
+                const recordRate = stat.recordRate.toFixed(1);
+                let rateClass = 'percentage-high';
+                if (recordRate < 85) {
+                    rateClass = 'percentage-low';
+                } else if (recordRate < 92) {
+                    rateClass = 'percentage-medium';
+                }
+                
+                rowsHTML += `
+                    <tr>
+                        <td><strong>${stat.department}</strong></td>
+                        <td>${stat.totalOrders}</td>
+                        <td>${stat.withRecords}</td>
+                        <td>${stat.withoutRecords}</td>
+                        <td class="percentage-cell ${rateClass}">${recordRate}%</td>
+                        <td>${stat.avgDuration}分钟</td>
+                    </tr>
+                `;
+            });
+            
+            departmentBody.innerHTML = rowsHTML;
+        }
+
+        // 显示操作员统计数据
+        function displayOperatorStats(stats) {
+            const operatorBody = document.getElementById('operatorBody');
+            const noDataMessage = document.getElementById('noDataMessage');
+            
+            if (stats.length === 0) {
+                operatorBody.innerHTML = '';
+                noDataMessage.style.display = 'block';
+                return;
+            }
+            
+            noDataMessage.style.display = 'none';
+            
+            let rowsHTML = '';
+            stats.forEach(stat => {
+                const recordRate = stat.recordRate.toFixed(1);
+                let rateClass = 'percentage-high';
+                if (recordRate < 85) {
+                    rateClass = 'percentage-low';
+                } else if (recordRate < 92) {
+                    rateClass = 'percentage-medium';
+                }
+                
+                rowsHTML += `
+                    <tr>
+                        <td>${stat.department}</td>
+                        <td><strong>${stat.operator}</strong></td>
+                        <td>${stat.totalOrders}</td>
+                        <td>${stat.withRecords}</td>
+                        <td>${stat.withoutRecords}</td>
+                        <td class="percentage-cell ${rateClass}">${recordRate}%</td>
+                        <td>${stat.avgDuration}分钟</td>
+                    </tr>
+                `;
+            });
+            
+            operatorBody.innerHTML = rowsHTML;
+        }
+
+        // 更新统计摘要
+        function updateSummaryStats(stats, type) {
+            const summaryElement = document.getElementById('statisticsSummary');
+            
+            if (stats.length === 0) {
+                summaryElement.innerHTML = `
+                    <div class="summary-card">
+                        <div class="summary-title">统计项数</div>
+                        <div class="summary-value">0</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const totalItems = stats.length;
+            
+            if (type === 'department') {
+                const totalOrders = stats.reduce((sum, stat) => sum + stat.totalOrders, 0);
+                const totalWithRecords = stats.reduce((sum, stat) => sum + stat.withRecords, 0);
+                const totalWithoutRecords = stats.reduce((sum, stat) => sum + stat.withoutRecords, 0);
+                const avgRecordRate = (totalWithRecords / totalOrders * 100).toFixed(1);
+                
+                summaryElement.innerHTML = `
+                    
+                    <div class="summary-card">
+                        <div class="summary-title">总受理单数</div>
+                        <div class="summary-value">${totalOrders}</div>
+                    </div>
+                    <div class="summary-card records">
+                        <div class="summary-title">有服务留痕数</div>
+                        <div class="summary-value">${totalWithRecords}</div>
+                    </div>
+                    <div class="summary-card empty">
+                        <div class="summary-title">无服务留痕数</div>
+                        <div class="summary-value">${totalWithoutRecords}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">总体服务留痕率</div>
+                        <div class="summary-value">${avgRecordRate}%</div>
+                    </div>
+                `;
+            } else {
+                const totalOrders = stats.reduce((sum, stat) => sum + stat.totalOrders, 0);
+                const totalWithRecords = stats.reduce((sum, stat) => sum + stat.withRecords, 0);
+                const totalWithoutRecords = stats.reduce((sum, stat) => sum + stat.withoutRecords, 0);
+                const avgRecordRate = (totalWithRecords / totalOrders * 100).toFixed(1);
+                const uniqueDepartments = [...new Set(stats.map(stat => stat.department))].length;
+                
+                summaryElement.innerHTML = `
+                    <div class="summary-card operator">
+                        <div class="summary-title">统计操作员数</div>
+                        <div class="summary-value">${totalItems}</div>
+                    </div>
+                    <div class="summary-card department">
+                        <div class="summary-title">涉及部门数</div>
+                        <div class="summary-value">${uniqueDepartments}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">总受理单数</div>
+                        <div class="summary-value">${totalOrders}</div>
+                    </div>
+                    <div class="summary-card records">
+                        <div class="summary-title">有服务留痕数</div>
+                        <div class="summary-value">${totalWithRecords}</div>
+                    </div>
+                    <div class="summary-card empty">
+                        <div class="summary-title">无服务留痕数</div>
+                        <div class="summary-value">${totalWithoutRecords}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-title">总体服务留痕率</div>
+                        <div class="summary-value">${avgRecordRate}%</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 关闭模态框
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 重置表单
+        function resetForm() {
+            document.getElementById('address').value = '';
+            document.getElementById('department').value = '';
+            document.getElementById('operator').value = '';
+            document.getElementById('startDate').value = '2025-10-01';
+            document.getElementById('endDate').value = '2025-10-31';
+            
+            // 显示部门统计表格
+            document.getElementById('departmentTable').style.display = 'table';
+            document.getElementById('operatorTable').style.display = 'none';
+            
+            // 显示所有统计数据
+            displayDepartmentStats(mockStatisticsData.departmentStats);
+            updateSummaryStats(mockStatisticsData.departmentStats, 'department');
+        }
+
+        // 点击模态框背景关闭
+        document.getElementById('treeModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal('treeModal');
+            }
+        });
+    </script>
+</body>
+</html>
