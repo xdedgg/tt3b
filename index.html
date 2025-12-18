@@ -208,18 +208,6 @@
             border-left: 4px solid #1a73e8;
         }
         
-        .summary-card.total-orders {
-            border-left: 4px solid #34a853;
-        }
-        
-        .summary-card.total-service-records {
-            border-left: 4px solid #ea4335;
-        }
-        
-        .summary-card.total-people {
-            border-left: 4px solid #fbbc04;
-        }
-        
         .summary-card.avg-record-rate {
             border-left: 4px solid #9c27b0;
         }
@@ -245,18 +233,6 @@
         
         .summary-card.total-items .summary-value {
             color: #1a73e8;
-        }
-        
-        .summary-card.total-orders .summary-value {
-            color: #34a853;
-        }
-        
-        .summary-card.total-service-records .summary-value {
-            color: #ea4335;
-        }
-        
-        .summary-card.total-people .summary-value {
-            color: #fbbc04;
         }
         
         .summary-card.avg-record-rate .summary-value {
@@ -324,6 +300,10 @@
             text-align: center;
         }
         
+        .service-type-cell {
+            text-align: center;
+        }
+        
         .no-data {
             text-align: center;
             padding: 40px 20px;
@@ -331,7 +311,7 @@
             font-size: 14px;
         }
         
-        .no-data i {
+        .no-data div {
             font-size: 40px;
             margin-bottom: 15px;
             color: #ccc;
@@ -488,6 +468,70 @@
             color: #ea4335;
         }
         
+        /* 服务类型勾选框样式 */
+        .service-type-group {
+            margin-bottom: 16px;
+        }
+        
+        .service-type-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 13px;
+        }
+        
+        .service-type-container {
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 12px;
+            background-color: white;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .service-type-item {
+            padding: 6px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .service-type-item:hover {
+            background-color: #f0f7ff;
+        }
+        
+        .service-type-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ddd;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        
+        .service-type-item.selected .service-type-checkbox {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+        
+        .service-type-item.selected .service-type-checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+        }
+        
+        .service-type-text {
+            flex: 1;
+        }
+        
         @media (max-width: 1200px) {
             .main-content {
                 flex-direction: column;
@@ -526,14 +570,14 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>服务记录统计分析</h1>
-            <p>统计各部门、操作员、客户地址的服务记录情况</p>
+            <p>统计操作员、客户地址的服务记录情况</p>
         </header>
         
         <div class="main-content">
@@ -541,33 +585,21 @@
                 <h2 class="section-title">统计条件设置</h2>
                 
                 <div class="tree-selector">
-                    <button class="btn btn-secondary" onclick="toggleTree('department')" id="departmentBtn">选择部门</button>
-                    <div class="tree-container" id="departmentTree">
-                        <!-- 部门树形结构将在这里动态生成 -->
-                    </div>
-                    <div class="selected-tags" id="departmentTags">
-                        <!-- 已选择的部门标签将在这里动态生成 -->
-                    </div>
+                    <button class="btn btn-secondary" onclick="toggleTree('address')" id="addressBtn">选择网格地址</button>
+                    <div class="tree-container" id="addressTree"></div>
+                    <div class="selected-tags" id="addressTags"></div>
                 </div>
                 
                 <div class="tree-selector">
                     <button class="btn btn-secondary" onclick="toggleTree('operator')" id="operatorBtn">选择操作员</button>
-                    <div class="tree-container" id="operatorTree">
-                        <!-- 操作员树形结构将在这里动态生成 -->
-                    </div>
-                    <div class="selected-tags" id="operatorTags">
-                        <!-- 已选择的操作员标签将在这里动态生成 -->
-                    </div>
+                    <div class="tree-container" id="operatorTree"></div>
+                    <div class="selected-tags" id="operatorTags"></div>
                 </div>
                 
-                <div class="tree-selector">
-                    <button class="btn btn-secondary" onclick="toggleTree('address')" id="addressBtn">选择客户地址</button>
-                    <div class="tree-container" id="addressTree">
-                        <!-- 客户地址树形结构将在这里动态生成 -->
-                    </div>
-                    <div class="selected-tags" id="addressTags">
-                        <!-- 已选择的客户地址标签将在这里动态生成 -->
-                    </div>
+                <div class="service-type-group">
+                    <div class="service-type-title">服务类型选择</div>
+                    <div class="service-type-container" id="serviceTypeContainer"></div>
+                    <div class="selected-tags" id="serviceTypeTags"></div>
                 </div>
                 
                 <div class="form-group">
@@ -594,26 +626,12 @@
                     </div>
                 </div>
                 
-                <div class="statistics-summary" id="statisticsSummary">
-                    <!-- 统计摘要信息将在这里动态生成 -->
-                </div>
+                <div class="statistics-summary" id="statisticsSummary"></div>
                 
                 <div class="table-container">
                     <table class="statistics-table" id="resultTable">
-                        <thead>
-                            <tr>
-                                <th>名称</th>
-                                <th>工单数</th>
-                                <th>服务记录数</th>
-                                <th>服务记录率</th>
-                                <th>服务人数</th>
-                                <th>平均每单服务时长</th>
-                                <th>平均每人每日服务时长</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultBody">
-                            <!-- 统计数据将在这里动态生成 -->
-                        </tbody>
+                        <thead id="resultTableHead"></thead>
+                        <tbody id="resultBody"></tbody>
                     </table>
                 </div>
                 
@@ -627,91 +645,17 @@
     </div>
 
     <script>
-        // 生成模拟操作员姓名
-        function generateOperators(count, prefix) {
-            const surnames = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴', 
-                           '徐', '孙', '胡', '朱', '高', '林', '何', '郭', '马', '罗'];
-            const names = ['伟', '芳', '娜', '秀英', '敏', '静', '丽', '强', '磊', '军', 
-                         '洋', '勇', '艳', '杰', '娟', '涛', '明', '超', '秀兰', '霞', 
-                         '平', '刚', '桂英', '博', '文', '华', '建国', '红', '鹏', '玉兰'];
-            
-            const operators = [];
-            for (let i = 1; i <= count; i++) {
-                const surname = surnames[Math.floor(Math.random() * surnames.length)];
-                const name = names[Math.floor(Math.random() * names.length)];
-                const id = String(520000 + i).padStart(6, '0');
-                operators.push({
-                    id: `${prefix}-op${i}`,
-                    name: `${surname}${name}（${id}）`,
-                    level: 2,
-                    children: []
-                });
-            }
-            return operators;
-        }
-
-        // 生成模拟网格名称
-        function generateGrids(count, prefix) {
-            const areas = ['东', '西', '南', '北', '中', '新', '老', '大', '小'];
-            const types = ['网格'];
-            
-            const grids = [];
-            for (let i = 1; i <= count; i++) {
-                const area = areas[Math.floor(Math.random() * areas.length)];
-                const type = types[Math.floor(Math.random() * types.length)];
-                grids.push({
-                    id: `${prefix}-grid${i}`,
-                    name: `${area}${type}${i}`,
-                    level: 3,
-                    children: []
-                });
-            }
-            return grids;
-        }
+        // 服务类型数据
+        const serviceTypes = [
+            { id: "开户安装", name: "开户安装" },
+            { id: "设备维护", name: "设备维护" },
+            { id: "故障维修", name: "故障维修" },
+            { id: "协助调试", name: "协助调试" },
+            { id: "营销咨询", name: "营销咨询" }
+        ];
 
         // 组织结构数据
         const organizationalStructure = {
-            departments: [
-                {
-                    id: "总公司",
-                    name: "总公司",
-                    level: 1,
-                    expanded: false,
-                    children: [
-                        {
-                            id: "和平河西分公司",
-                            name: "和平河西分公司",
-                            level: 2,
-                            expanded: false,
-                            children: [
-                                { id: "和平", name: "和平", level: 3, expanded: false, children: [] },
-                                { id: "河西", name: "河西", level: 3, expanded: false, children: [] }
-                            ]
-                        },
-                        {
-                            id: "滨海分公司",
-                            name: "滨海分公司",
-                            level: 2,
-                            expanded: false,
-                            children: [
-                                { id: "塘沽", name: "塘沽", level: 3, expanded: false, children: [] },
-                                { id: "汉沽", name: "汉沽", level: 3, expanded: false, children: [] },
-                                { id: "大港", name: "大港", level: 3, expanded: false, children: [] }
-                            ]
-                        },
-                        {
-                            id: "北辰分公司",
-                            name: "北辰分公司",
-                            level: 2,
-                            expanded: false,
-                            children: [
-                                { id: "北辰", name: "北辰", level: 3, expanded: false, children: [] }
-                            ]
-                        }
-                    ]
-                }
-            ],
-            
             operators: [
                 {
                     id: "和平河西分公司",
@@ -771,39 +715,147 @@
 
         // 全局变量
         let selectedItems = {
-            department: [],
+            address: [],
             operator: [],
-            address: []
+            serviceType: []
         };
         
         let currentTree = null;
         let currentQueryType = null;
         let currentStats = [];
 
+        // 生成模拟操作员姓名
+        function generateOperators(count, prefix) {
+            const surnames = ['王', '李', '张', '刘', '陈', '杨', '赵', '黄', '周', '吴', 
+                           '徐', '孙', '胡', '朱', '高', '林', '何', '郭', '马', '罗'];
+            const names = ['伟', '芳', '娜', '宇', '敏', '静', '丽', '强', '磊', '军', 
+                         '洋', '勇', '洋', '杰', '风', '涛', '明', '超', '梓涵', '冬冬', 
+                         '平', '小雨', '名', '一博', '文', '华', '轩', '红', '鹏', '博'];
+            
+            const operators = [];
+            for (let i = 1; i <= count; i++) {
+                const surname = surnames[Math.floor(Math.random() * surnames.length)];
+                const name = names[Math.floor(Math.random() * names.length)];
+                const id = String(520000 + i).padStart(6, '0');
+                operators.push({
+                    id: `${prefix}-op${i}`,
+                    name: `${surname}${name}（${id}）`,
+                    level: 2,
+                    children: []
+                });
+            }
+            return operators;
+        }
+
+        // 生成模拟网格名称
+        function generateGrids(count, prefix) {
+            const areas = ['东', '西', '南', '北', '中', '新', '老', '大', '小'];
+            const types = ['网格'];
+            
+            const grids = [];
+            for (let i = 1; i <= count; i++) {
+                const area = areas[Math.floor(Math.random() * areas.length)];
+                const type = types[Math.floor(Math.random() * types.length)];
+                grids.push({
+                    id: `${prefix}-grid${i}`,
+                    name: `${area}${type}${i}`,
+                    level: 3,
+                    children: []
+                });
+            }
+            return grids;
+        }
+
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 初始化树形选择器
             initTreeSelectors();
-            
-            // 默认显示统计数据
+            initServiceTypeCheckboxes();
+            setDefaultSelection();
             queryStatistics();
         });
 
+        // 设置默认选择（三个分公司）
+        function setDefaultSelection() {
+            selectedItems = {
+                address: [],
+                operator: [],
+                serviceType: []
+            };
+            
+            const defaultBranches = ["和平河西分公司", "滨海分公司", "北辰分公司"];
+            defaultBranches.forEach(branchId => {
+                const findBranch = (nodes) => {
+                    for (let node of nodes) {
+                        if (node.id === branchId) return node;
+                        if (node.children?.length) {
+                            const found = findBranch(node.children);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+                
+                const branch = findBranch(organizationalStructure.addresses);
+                if (branch) {
+                    selectedItems.address.push({ id: branch.id, name: branch.name, level: branch.level });
+                }
+            });
+            
+            const addressTree = document.getElementById('addressTree');
+            addressTree.innerHTML = generateTreeHTML(organizationalStructure.addresses, 'address');
+            document.getElementById('addressBtn').textContent = `选择网格地址 (${selectedItems.address.length}项)`;
+            
+            updateSelectedTags();
+        }
+
         // 初始化树形选择器
         function initTreeSelectors() {
-            // 初始化部门树
-            const departmentTree = document.getElementById('departmentTree');
-            departmentTree.innerHTML = generateTreeHTML(organizationalStructure.departments, 'department');
-            
-            // 初始化操作员树
-            const operatorTree = document.getElementById('operatorTree');
-            operatorTree.innerHTML = generateTreeHTML(organizationalStructure.operators, 'operator');
-            
-            // 初始化客户地址树
             const addressTree = document.getElementById('addressTree');
             addressTree.innerHTML = generateTreeHTML(organizationalStructure.addresses, 'address');
             
-            // 更新已选择标签
+            const operatorTree = document.getElementById('operatorTree');
+            operatorTree.innerHTML = generateTreeHTML(organizationalStructure.operators, 'operator');
+            
+            updateSelectedTags();
+        }
+
+        // 初始化服务类型勾选框
+        function initServiceTypeCheckboxes() {
+            const serviceTypeContainer = document.getElementById('serviceTypeContainer');
+            
+            let html = '';
+            serviceTypes.forEach(serviceType => {
+                const isSelected = selectedItems.serviceType.some(item => item.id === serviceType.id);
+                html += `
+                    <div class="service-type-item ${isSelected ? 'selected' : ''}" onclick="toggleServiceType('${serviceType.id}')">
+                        <div class="service-type-checkbox"></div>
+                        <div class="service-type-text">${serviceType.name}</div>
+                    </div>
+                `;
+            });
+            
+            serviceTypeContainer.innerHTML = html;
+            updateSelectedTags();
+        }
+
+        // 切换服务类型选择
+        function toggleServiceType(serviceTypeId) {
+            const serviceType = serviceTypes.find(st => st.id === serviceTypeId);
+            if (!serviceType) return;
+            
+            const index = selectedItems.serviceType.findIndex(item => item.id === serviceTypeId);
+            
+            if (index !== -1) {
+                selectedItems.serviceType.splice(index, 1);
+            } else {
+                selectedItems.serviceType.push({ id: serviceType.id, name: serviceType.name });
+            }
+            
+            const serviceTypeItem = document.querySelector(`[onclick="toggleServiceType('${serviceTypeId}')"]`);
+            if (serviceTypeItem) {
+                serviceTypeItem.classList.toggle('selected');
+            }
+            
             updateSelectedTags();
         }
 
@@ -813,7 +865,7 @@
             
             nodes.forEach(node => {
                 const isSelected = selectedItems[type].some(item => item.id === node.id);
-                const hasChildren = node.children && node.children.length > 0;
+                const hasChildren = node.children?.length > 0;
                 const showChildren = parentExpanded && node.expanded;
                 
                 html += `
@@ -841,9 +893,7 @@
         function toggleTreeNode(event, type, nodeId) {
             event.stopPropagation();
             
-            const nodes = type === 'department' ? organizationalStructure.departments :
-                         type === 'operator' ? organizationalStructure.operators :
-                         organizationalStructure.addresses;
+            const nodes = type === 'operator' ? organizationalStructure.operators : organizationalStructure.addresses;
             
             const toggleNode = (nodeList) => {
                 for (let node of nodeList) {
@@ -851,10 +901,8 @@
                         node.expanded = !node.expanded;
                         return true;
                     }
-                    if (node.children && node.children.length > 0) {
-                        if (toggleNode(node.children)) {
-                            return true;
-                        }
+                    if (node.children?.length) {
+                        if (toggleNode(node.children)) return true;
                     }
                 }
                 return false;
@@ -862,7 +910,6 @@
             
             toggleNode(nodes);
             
-            // 重新生成树形结构HTML
             const treeElement = document.getElementById(type + 'Tree');
             treeElement.innerHTML = generateTreeHTML(nodes, type);
         }
@@ -871,17 +918,12 @@
         function handleTreeItemClick(event, type, nodeId) {
             event.stopPropagation();
             
-            const nodes = type === 'department' ? organizationalStructure.departments :
-                         type === 'operator' ? organizationalStructure.operators :
-                         organizationalStructure.addresses;
+            const nodes = type === 'operator' ? organizationalStructure.operators : organizationalStructure.addresses;
             
-            // 查找节点
             const findNode = (nodeList) => {
                 for (let node of nodeList) {
-                    if (node.id === nodeId) {
-                        return node;
-                    }
-                    if (node.children && node.children.length > 0) {
+                    if (node.id === nodeId) return node;
+                    if (node.children?.length) {
                         const found = findNode(node.children);
                         if (found) return found;
                     }
@@ -892,10 +934,9 @@
             const node = findNode(nodes);
             if (!node) return;
             
-            // 获取该节点下的所有节点（包括自身和子节点）
             const getAllNodes = (currentNode) => {
                 const nodes = [currentNode];
-                if (currentNode.children && currentNode.children.length > 0) {
+                if (currentNode.children?.length) {
                     currentNode.children.forEach(child => {
                         nodes.push(...getAllNodes(child));
                     });
@@ -904,12 +945,9 @@
             };
             
             const allNodes = getAllNodes(node);
-            
-            // 检查是否已选择
             const isSelected = selectedItems[type].some(item => item.id === nodeId);
             
             if (isSelected) {
-                // 移除选择：移除该节点及其所有子节点
                 allNodes.forEach(n => {
                     const index = selectedItems[type].findIndex(item => item.id === n.id);
                     if (index !== -1) {
@@ -917,7 +955,6 @@
                     }
                 });
             } else {
-                // 添加选择：添加该节点及其所有子节点
                 allNodes.forEach(n => {
                     if (!selectedItems[type].some(item => item.id === n.id)) {
                         selectedItems[type].push({ id: n.id, name: n.name, level: n.level });
@@ -925,20 +962,15 @@
                 });
             }
             
-            // 重新生成树形结构HTML
             const treeElement = document.getElementById(type + 'Tree');
             treeElement.innerHTML = generateTreeHTML(nodes, type);
             
-            // 更新按钮文本
             document.getElementById(type + 'Btn').textContent = `选择${getTypeName(type)} (${selectedItems[type].length}项)`;
-            
-            // 更新已选择标签
             updateSelectedTags();
         }
 
         // 切换树形选择器显示/隐藏
         function toggleTree(type) {
-            // 如果点击的是当前已打开的树，则关闭它
             if (currentTree === type) {
                 document.getElementById(type + 'Tree').classList.remove('active');
                 document.getElementById(type + 'Btn').classList.remove('active');
@@ -946,58 +978,49 @@
                 return;
             }
             
-            // 关闭之前打开的树
             if (currentTree) {
                 document.getElementById(currentTree + 'Tree').classList.remove('active');
                 document.getElementById(currentTree + 'Btn').classList.remove('active');
             }
             
-            // 清空其他维度的选择
-            const otherTypes = ['department', 'operator', 'address'].filter(t => t !== type);
-            otherTypes.forEach(otherType => {
+            const otherTreeTypes = ['operator', 'address'].filter(t => t !== type);
+            otherTreeTypes.forEach(otherType => {
                 selectedItems[otherType] = [];
                 document.getElementById(otherType + 'Btn').textContent = `选择${getTypeName(otherType)}`;
                 
-                // 重新生成树以清除选中状态
-                const nodes = otherType === 'department' ? organizationalStructure.departments :
-                             otherType === 'operator' ? organizationalStructure.operators :
-                             organizationalStructure.addresses;
+                const nodes = otherType === 'operator' ? organizationalStructure.operators : organizationalStructure.addresses;
                 const treeElement = document.getElementById(otherType + 'Tree');
                 treeElement.innerHTML = generateTreeHTML(nodes, otherType);
             });
             
-            // 打开当前树
             currentTree = type;
             document.getElementById(type + 'Tree').classList.add('active');
             document.getElementById(type + 'Btn').classList.add('active');
             document.getElementById(type + 'Btn').textContent = `选择${getTypeName(type)} (${selectedItems[type].length}项)`;
             
-            // 更新已选择标签
             updateSelectedTags();
         }
 
         // 获取类型名称
         function getTypeName(type) {
             const names = {
-                department: '部门',
                 operator: '操作员',
-                address: '客户地址'
+                address: '客户地址',
+                serviceType: '服务类型'
             };
             return names[type] || type;
         }
 
         // 更新已选择标签
         function updateSelectedTags() {
-            // 更新部门标签
-            const departmentTags = document.getElementById('departmentTags');
-            departmentTags.innerHTML = selectedItems.department.map(item => `
+            const addressTags = document.getElementById('addressTags');
+            addressTags.innerHTML = selectedItems.address.map(item => `
                 <div class="selected-tag">
                     ${item.name}
-                    <button class="remove-tag" onclick="removeSelectedItem('department', '${item.id}')">&times;</button>
+                    <button class="remove-tag" onclick="removeSelectedItem('address', '${item.id}')">&times;</button>
                 </div>
             `).join('');
             
-            // 更新操作员标签
             const operatorTags = document.getElementById('operatorTags');
             operatorTags.innerHTML = selectedItems.operator.map(item => `
                 <div class="selected-tag">
@@ -1006,12 +1029,11 @@
                 </div>
             `).join('');
             
-            // 更新客户地址标签
-            const addressTags = document.getElementById('addressTags');
-            addressTags.innerHTML = selectedItems.address.map(item => `
+            const serviceTypeTags = document.getElementById('serviceTypeTags');
+            serviceTypeTags.innerHTML = selectedItems.serviceType.map(item => `
                 <div class="selected-tag">
                     ${item.name}
-                    <button class="remove-tag" onclick="removeSelectedItem('address', '${item.id}')">&times;</button>
+                    <button class="remove-tag" onclick="removeSelectedItem('serviceType', '${item.id}')">&times;</button>
                 </div>
             `).join('');
         }
@@ -1022,59 +1044,54 @@
             if (index !== -1) {
                 selectedItems[type].splice(index, 1);
                 
-                // 重新生成树形结构HTML以更新选中状态
-                const treeElement = document.getElementById(type + 'Tree');
-                const nodes = type === 'department' ? organizationalStructure.departments :
-                             type === 'operator' ? organizationalStructure.operators :
-                             organizationalStructure.addresses;
-                treeElement.innerHTML = generateTreeHTML(nodes, type);
+                if (type === 'operator' || type === 'address') {
+                    const treeElement = document.getElementById(type + 'Tree');
+                    const nodes = type === 'operator' ? organizationalStructure.operators : organizationalStructure.addresses;
+                    treeElement.innerHTML = generateTreeHTML(nodes, type);
+                    
+                    document.getElementById(type + 'Btn').textContent = `选择${getTypeName(type)} (${selectedItems[type].length}项)`;
+                } else if (type === 'serviceType') {
+                    const serviceTypeItem = document.querySelector(`[onclick="toggleServiceType('${id}')"]`);
+                    if (serviceTypeItem) {
+                        serviceTypeItem.classList.remove('selected');
+                    }
+                }
                 
-                // 更新按钮文本
-                document.getElementById(type + 'Btn').textContent = `选择${getTypeName(type)} (${selectedItems[type].length}项)`;
-                
-                // 更新已选择标签
                 updateSelectedTags();
             }
         }
 
         // 查询统计数据
         function queryStatistics() {
-            // 关闭所有树形选择器
             if (currentTree) {
                 document.getElementById(currentTree + 'Tree').classList.remove('active');
                 document.getElementById(currentTree + 'Btn').classList.remove('active');
                 currentTree = null;
             }
             
-            // 确定查询维度
             let queryType = null;
             let queryItems = [];
             
-            if (selectedItems.department.length > 0) {
-                queryType = 'department';
-                queryItems = selectedItems.department;
+            if (selectedItems.address.length > 0) {
+                queryType = 'address';
+                queryItems = selectedItems.address;
             } else if (selectedItems.operator.length > 0) {
                 queryType = 'operator';
                 queryItems = selectedItems.operator;
-            } else if (selectedItems.address.length > 0) {
-                queryType = 'address';
-                queryItems = selectedItems.address;
             } else {
-                // 默认查询所有部门
-                queryType = 'department';
-                queryItems = getAllLeafNodes(organizationalStructure.departments);
+                queryType = 'address';
+                if (selectedItems.address.length === 0) {
+                    setDefaultSelection();
+                    queryItems = selectedItems.address;
+                } else {
+                    queryItems = selectedItems.address;
+                }
             }
             
-            // 保存当前查询类型
             currentQueryType = queryType;
-            
-            // 生成模拟数据
             currentStats = generateMockStats(queryItems, queryType);
             
-            // 显示统计数据
             displayStats(currentStats, queryType);
-            
-            // 更新摘要统计
             updateSummaryStats(currentStats, queryType);
         }
 
@@ -1083,7 +1100,7 @@
             let leafNodes = [];
             
             nodes.forEach(node => {
-                if (node.children && node.children.length > 0) {
+                if (node.children?.length) {
                     leafNodes = leafNodes.concat(getAllLeafNodes(node.children));
                 } else {
                     leafNodes.push({ id: node.id, name: node.name, level: node.level });
@@ -1094,57 +1111,124 @@
         }
 
         // 生成模拟统计数据
-function generateMockStats(items, type) {
-    return items.map(item => {
-        // 服务人数：当选择条件为操作员时，服务人数显示为1
-        // 其他情况下：每个网格2-7之间，每个分公司不超过40人
-        let peopleCount;
-        if (type === 'operator') {
-            peopleCount = 1; // 操作员维度，服务人数固定为1
-        } else {
-            peopleCount = Math.floor(Math.random() * 6) + 2; // 2-7人
+        function generateMockStats(items, type) {
+            const stats = [];
+            const selectedServiceTypes = selectedItems.serviceType;
             
-            // 如果是分公司级别，确保不超过40人
-            if (item.level === 2 && type === 'department') {
-                peopleCount = Math.min(peopleCount * 5, 40); // 假设每个分公司有5个网格
+            if (type === 'address') {
+                items.forEach(item => {
+                    const node = findNodeInStructure(organizationalStructure.addresses, item.id);
+                    
+                    if (!node) {
+                        const stat = generateStatForItem(item.name, false, selectedServiceTypes);
+                        stats.push(stat);
+                        return;
+                    }
+                    
+                    if (node.children?.length) {
+                        const allLeafNodes = getAllLeafNodes([node]);
+                        const leafStats = [];
+                        
+                        allLeafNodes.forEach(leafNode => {
+                            const stat = generateStatForItem(leafNode.name, true, selectedServiceTypes);
+                            leafStats.push(stat);
+                        });
+                        
+                        const aggregatedStat = {
+                            name: item.name,
+                            totalOrders: leafStats.reduce((sum, stat) => sum + stat.totalOrders, 0),
+                            serviceRecords: leafStats.reduce((sum, stat) => sum + stat.serviceRecords, 0),
+                            recordRate: 0,
+                            peopleCount: leafStats.reduce((sum, stat) => sum + stat.peopleCount, 0),
+                            avgDurationPerOrder: Math.floor(leafStats.reduce((sum, stat) => sum + stat.avgDurationPerOrder, 0) / leafStats.length),
+                            avgDailyPerPersonDuration: Math.floor(leafStats.reduce((sum, stat) => sum + stat.avgDailyPerPersonDuration, 0) / leafStats.length)
+                        };
+                        
+                        aggregatedStat.recordRate = aggregatedStat.totalOrders > 0 ? 
+                            parseFloat((aggregatedStat.serviceRecords / aggregatedStat.totalOrders * 100).toFixed(1)) : 0;
+                        
+                        if (selectedServiceTypes.length > 0) {
+                            aggregatedStat.serviceType = selectedServiceTypes.length > 1 ? "多种类型" : selectedServiceTypes[0].name;
+                        } else {
+                            aggregatedStat.serviceType = "全部";
+                        }
+                        
+                        stats.push(aggregatedStat);
+                    } else {
+                        const stat = generateStatForItem(item.name, true, selectedServiceTypes);
+                        stats.push(stat);
+                    }
+                });
+            } else if (type === 'operator') {
+                items.forEach(item => {
+                    const stat = generateStatForItem(item.name, false, selectedServiceTypes);
+                    stat.peopleCount = 1;
+                    stats.push(stat);
+                });
             }
+            
+            return stats;
         }
-        
-        // 工单数：服务人数乘以3-9之间的随机整数
-        const multiplier = Math.floor(Math.random() * 7) + 3; // 3-9之间的随机整数
-        const totalOrders = peopleCount * multiplier;
-        
-        // 服务记录数：小于工单数且大于工单数的60%
-        const minRecords = Math.max(1, Math.floor(totalOrders * 0.6));
-        const serviceRecords = Math.floor(Math.random() * (totalOrders - minRecords)) + minRecords;
-        
-        // 服务记录率：46%到99%之间
-        const recordRate = (Math.random() * 53 + 46).toFixed(1);
-        
-        // 平均每单服务时长：16分钟到3小时55分钟之间（16-235分钟）
-        const avgDurationPerOrder = Math.floor(Math.random() * 220) + 16;
-        
-        // 平均每人每日服务时长：2小时2分钟到7小时8分钟之间（122-428分钟）
-        const avgDailyPerPersonDuration = Math.floor(Math.random() * 307) + 122;
-        
-        return {
-            name: item.name,
-            totalOrders: totalOrders,
-            serviceRecords: serviceRecords,
-            recordRate: parseFloat(recordRate),
-            peopleCount: peopleCount,
-            avgDurationPerOrder: avgDurationPerOrder,
-            avgDailyPerPersonDuration: avgDailyPerPersonDuration
-        };
-    });
-}
+
+        // 为单个项目生成统计数据
+        function generateStatForItem(name, isLeafNode, selectedServiceTypes) {
+            const basePeopleCount = isLeafNode ? Math.floor(Math.random() * 11) + 5 : Math.floor(Math.random() * 11) + 5;
+            
+            let serviceTypeFactor = 1.0;
+            if (selectedServiceTypes.length > 0) {
+                serviceTypeFactor = 0.6 + (Math.random() * 0.4);
+            }
+            
+            const adjustedPeopleCount = Math.max(1, Math.floor(basePeopleCount * serviceTypeFactor));
+            const multiplier = Math.floor(Math.random() * 7) + 3;
+            const totalOrders = adjustedPeopleCount * multiplier;
+            const minRecords = Math.max(1, Math.floor(totalOrders * 0.6));
+            const serviceRecords = Math.floor(Math.random() * (totalOrders - minRecords)) + minRecords;
+            const recordRate = (Math.random() * 53 + 46).toFixed(1);
+            const avgDurationPerOrder = Math.floor(Math.random() * 220) + 16;
+            const avgDailyPerPersonDuration = Math.floor(Math.random() * 307) + 122;
+            
+            let serviceTypeDisplay = "全部";
+            if (selectedServiceTypes.length > 0) {
+                if (selectedServiceTypes.length === 1) {
+                    serviceTypeDisplay = selectedServiceTypes[0].name;
+                } else {
+                    serviceTypeDisplay = "多种类型";
+                }
+            }
+            
+            return {
+                name: name,
+                totalOrders: totalOrders,
+                serviceRecords: serviceRecords,
+                recordRate: parseFloat(recordRate),
+                peopleCount: adjustedPeopleCount,
+                avgDurationPerOrder: Math.floor(avgDurationPerOrder),
+                avgDailyPerPersonDuration: Math.floor(avgDailyPerPersonDuration),
+                serviceType: serviceTypeDisplay
+            };
+        }
+
+        // 在组织结构中查找节点
+        function findNodeInStructure(nodes, nodeId) {
+            for (let node of nodes) {
+                if (node.id === nodeId) return node;
+                if (node.children?.length) {
+                    const found = findNodeInStructure(node.children, nodeId);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
 
         // 显示统计数据
         function displayStats(stats, type) {
+            const resultTableHead = document.getElementById('resultTableHead');
             const resultBody = document.getElementById('resultBody');
             const noDataMessage = document.getElementById('noDataMessage');
             
             if (stats.length === 0) {
+                resultTableHead.innerHTML = '';
                 resultBody.innerHTML = '';
                 noDataMessage.style.display = 'block';
                 return;
@@ -1152,9 +1236,30 @@ function generateMockStats(items, type) {
             
             noDataMessage.style.display = 'none';
             
+            const hasServiceTypeSelection = selectedItems.serviceType.length > 0;
+            let tableHeaderHTML = `
+                <tr>
+                    <th>名称</th>
+            `;
+            
+            if (hasServiceTypeSelection) {
+                tableHeaderHTML += `<th>服务类型</th>`;
+            }
+            
+            tableHeaderHTML += `
+                    <th>工单数</th>
+                    <th>服务记录数</th>
+                    <th>服务记录率</th>
+                    <th>服务人数</th>
+                    <th>平均每单服务时长</th>
+                    <th>平均每人每日服务时长</th>
+                </tr>
+            `;
+            
+            resultTableHead.innerHTML = tableHeaderHTML;
+            
             let rowsHTML = '';
             stats.forEach(stat => {
-                // 根据服务记录率确定颜色
                 let rateClass = 'percentage-high';
                 if (stat.recordRate < 70) {
                     rateClass = 'percentage-low';
@@ -1162,16 +1267,22 @@ function generateMockStats(items, type) {
                     rateClass = 'percentage-medium';
                 }
                 
-                // 格式化时长显示
                 const formatDuration = (minutes) => {
                     const hours = Math.floor(minutes / 60);
-                    const mins = minutes % 60;
+                    const mins = Math.floor(minutes % 60);
                     return `${hours}小时${mins}分钟`;
                 };
                 
                 rowsHTML += `
                     <tr>
                         <td><strong>${stat.name}</strong></td>
+                `;
+                
+                if (hasServiceTypeSelection) {
+                    rowsHTML += `<td class="service-type-cell">${stat.serviceType}</td>`;
+                }
+                
+                rowsHTML += `
                         <td class="people-cell">${stat.totalOrders}</td>
                         <td class="people-cell">${stat.serviceRecords}</td>
                         <td class="percentage-cell ${rateClass}">${stat.recordRate.toFixed(1)}%</td>
@@ -1199,18 +1310,13 @@ function generateMockStats(items, type) {
                 return;
             }
             
-            // 计算总体统计
-            const totalOrders = stats.reduce((sum, stat) => sum + stat.totalOrders, 0);
-            const totalServiceRecords = stats.reduce((sum, stat) => sum + stat.serviceRecords, 0);
-            const totalPeople = stats.reduce((sum, stat) => sum + stat.peopleCount, 0);
-            const avgRecordRate = totalOrders > 0 ? (totalServiceRecords / totalOrders * 100).toFixed(1) : 0;
+            const avgRecordRate = stats.reduce((sum, stat) => sum + stat.recordRate, 0) / stats.length;
             const avgDurationPerOrder = stats.reduce((sum, stat) => sum + stat.avgDurationPerOrder, 0) / stats.length;
             const avgDailyPerPersonDuration = stats.reduce((sum, stat) => sum + stat.avgDailyPerPersonDuration, 0) / stats.length;
             
-            // 格式化时长显示
             const formatDuration = (minutes) => {
                 const hours = Math.floor(minutes / 60);
-                const mins = Math.round(minutes % 60);
+                const mins = Math.floor(minutes % 60);
                 return `${hours}小时${mins}分钟`;
             };
             
@@ -1219,29 +1325,17 @@ function generateMockStats(items, type) {
                     <div class="summary-title">统计项数</div>
                     <div class="summary-value">${stats.length}</div>
                 </div>
-                <div class="summary-card total-orders">
-                    <div class="summary-title">总工单数</div>
-                    <div class="summary-value">${totalOrders}</div>
-                </div>
-                <div class="summary-card total-service-records">
-                    <div class="summary-title">总服务记录数</div>
-                    <div class="summary-value">${totalServiceRecords}</div>
-                </div>
-                <div class="summary-card total-people">
-                    <div class="summary-title">总服务人数</div>
-                    <div class="summary-value">${totalPeople}</div>
-                </div>
                 <div class="summary-card avg-record-rate">
                     <div class="summary-title">平均服务记录率</div>
-                    <div class="summary-value">${avgRecordRate}%</div>
+                    <div class="summary-value">${avgRecordRate.toFixed(1)}%</div>
                 </div>
                 <div class="summary-card avg-duration-per-order">
                     <div class="summary-title">平均每单服务时长</div>
-                    <div class="summary-value">${formatDuration(avgDurationPerOrder)}</div>
+                    <div class="summary-value">${formatDuration(Math.floor(avgDurationPerOrder))}</div>
                 </div>
                 <div class="summary-card avg-daily-per-person">
                     <div class="summary-title">平均每人每日服务时长</div>
-                    <div class="summary-value">${formatDuration(avgDailyPerPersonDuration)}</div>
+                    <div class="summary-value">${formatDuration(Math.floor(avgDailyPerPersonDuration))}</div>
                 </div>
             `;
             
@@ -1250,47 +1344,17 @@ function generateMockStats(items, type) {
 
         // 重置表单
         function resetForm() {
-            // 重置日期
             document.getElementById('startDate').value = '2025-12-01';
             document.getElementById('endDate').value = '2025-12-01';
             
-            // 重置选择
-            selectedItems = {
-                department: [],
-                operator: [],
-                address: []
-            };
+            setDefaultSelection();
             
-            // 重置所有树的展开状态
-            const resetExpandedState = (nodes) => {
-                nodes.forEach(node => {
-                    node.expanded = false;
-                    if (node.children && node.children.length > 0) {
-                        resetExpandedState(node.children);
-                    }
-                });
-            };
-            
-            resetExpandedState(organizationalStructure.departments);
-            resetExpandedState(organizationalStructure.operators);
-            resetExpandedState(organizationalStructure.addresses);
-            
-            // 关闭所有树形选择器
             if (currentTree) {
                 document.getElementById(currentTree + 'Tree').classList.remove('active');
                 document.getElementById(currentTree + 'Btn').classList.remove('active');
                 currentTree = null;
             }
             
-            // 更新按钮文本
-            document.getElementById('departmentBtn').textContent = '选择部门';
-            document.getElementById('operatorBtn').textContent = '选择操作员';
-            document.getElementById('addressBtn').textContent = '选择客户地址';
-            
-            // 重新初始化树形选择器
-            initTreeSelectors();
-            
-            // 显示默认统计数据（所有部门）
             queryStatistics();
         }
 
@@ -1301,66 +1365,85 @@ function generateMockStats(items, type) {
                 return;
             }
             
-            // 准备数据
+            const selectedServiceTypes = selectedItems.serviceType.map(item => item.name).join('、');
+            const serviceTypeText = selectedServiceTypes ? `服务类型: ${selectedServiceTypes}` : '服务类型: 全部';
+            
+            const headers = ['名称'];
+            if (selectedItems.serviceType.length > 0) {
+                headers.push('服务类型');
+            }
+            headers.push('工单数', '服务记录数', '服务记录率', '服务人数', '平均每单服务时长', '平均每人每日服务时长');
+            
             const data = [
                 ['服务记录统计分析报表'],
                 ['导出时间: ' + new Date().toLocaleString('zh-CN')],
-                ['查询维度: ' + (currentQueryType === 'department' ? '部门' : currentQueryType === 'operator' ? '操作员' : '客户地址')],
+                ['查询维度: ' + (currentQueryType === 'operator' ? '操作员' : '客户地址')],
+                [serviceTypeText],
                 ['统计时间段: ' + document.getElementById('startDate').value + ' 至 ' + document.getElementById('endDate').value],
                 [''],
-                ['名称', '工单数', '服务记录数', '服务记录率', '服务人数', '平均每单服务时长', '平均每人每日服务时长']
+                headers
             ];
             
-            // 添加统计数据
             currentStats.forEach(stat => {
                 const formatDuration = (minutes) => {
                     const hours = Math.floor(minutes / 60);
-                    const mins = minutes % 60;
+                    const mins = Math.floor(minutes % 60);
                     return `${hours}小时${mins}分钟`;
                 };
                 
-                data.push([
-                    stat.name,
+                const rowData = [stat.name];
+                if (selectedItems.serviceType.length > 0) {
+                    rowData.push(stat.serviceType);
+                }
+                rowData.push(
                     stat.totalOrders,
                     stat.serviceRecords,
                     stat.recordRate.toFixed(1) + '%',
                     stat.peopleCount,
                     formatDuration(stat.avgDurationPerOrder),
                     formatDuration(stat.avgDailyPerPersonDuration)
-                ]);
+                );
+                
+                data.push(rowData);
             });
             
-            // 创建workbook
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.aoa_to_sheet(data);
             
-            // 设置列宽
             const colWidths = [
                 {wch: 30}, // 名称
+            ];
+            if (selectedItems.serviceType.length > 0) {
+                colWidths.push({wch: 12}); // 服务类型
+            }
+            colWidths.push(
                 {wch: 10}, // 工单数
                 {wch: 12}, // 服务记录数
                 {wch: 12}, // 服务记录率
                 {wch: 10}, // 服务人数
                 {wch: 18}, // 平均每单服务时长
                 {wch: 20}  // 平均每人每日服务时长
-            ];
+            );
             ws['!cols'] = colWidths;
             
-            // 合并标题行
-            ws['!merges'] = [
+            const mergeRanges = [
                 XLSX.utils.decode_range("A1:G1"),
                 XLSX.utils.decode_range("A2:G2"),
                 XLSX.utils.decode_range("A3:G3"),
-                XLSX.utils.decode_range("A4:G4")
+                XLSX.utils.decode_range("A4:G4"),
+                XLSX.utils.decode_range("A5:G5")
             ];
+            if (selectedItems.serviceType.length > 0) {
+                mergeRanges.forEach(range => {
+                    range.e.c = range.e.c + 1;
+                });
+            }
+            ws['!merges'] = mergeRanges;
             
-            // 添加到workbook
             XLSX.utils.book_append_sheet(wb, ws, "服务记录统计");
             
-            // 生成文件名
             const fileName = `服务记录统计_${new Date().toISOString().slice(0, 10)}.xlsx`;
             
-            // 导出
             XLSX.writeFile(wb, fileName);
         }
 
@@ -1371,107 +1454,168 @@ function generateMockStats(items, type) {
                 return;
             }
             
-            // 创建PDF文档
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4');
-            
-            // 标题
-            doc.setFontSize(16);
-            doc.text('服务记录统计分析报表', 105, 15, { align: 'center' });
-            
-            // 导出信息
-            doc.setFontSize(10);
-            doc.text(`导出时间: ${new Date().toLocaleString('zh-CN')}`, 10, 25);
-            doc.text(`查询维度: ${currentQueryType === 'department' ? '部门' : currentQueryType === 'operator' ? '操作员' : '客户地址'}`, 10, 30);
-            doc.text(`统计时间段: ${document.getElementById('startDate').value} 至 ${document.getElementById('endDate').value}`, 10, 35);
-            
-            // 表头
-            const headers = ['名称', '工单数', '服务记录数', '服务记录率', '服务人数', '平均每单服务时长', '平均每人每日服务时长'];
-            const columnWidths = [50, 20, 25, 25, 20, 35, 40];
-            let startY = 45;
-            
-            // 绘制表头
-            doc.setFillColor(241, 243, 244);
-            doc.rect(10, startY, 270, 8, 'F');
-            doc.setFontSize(11);
-            doc.setTextColor(85, 85, 85);
-            
-            let currentX = 10;
-            headers.forEach((header, index) => {
-                doc.text(header, currentX + columnWidths[index]/2, startY + 5.5, { align: 'center' });
-                currentX += columnWidths[index];
-            });
-            
-            startY += 8;
-            
-            // 绘制数据行
-            doc.setFontSize(10);
-            doc.setTextColor(0, 0, 0);
-            
-            currentStats.forEach((stat, rowIndex) => {
-                if (startY > 270) { // 换页
-                    doc.addPage();
-                    startY = 20;
-                    // 在新页面上重新绘制表头
-                    doc.setFillColor(241, 243, 244);
-                    doc.rect(10, startY, 270, 8, 'F');
-                    doc.setFontSize(11);
-                    doc.setTextColor(85, 85, 85);
-                    
-                    currentX = 10;
-                    headers.forEach((header, index) => {
-                        doc.text(header, currentX + columnWidths[index]/2, startY + 5.5, { align: 'center' });
-                        currentX += columnWidths[index];
-                    });
-                    
-                    startY += 8;
-                    doc.setFontSize(10);
-                    doc.setTextColor(0, 0, 0);
+            try {
+                const selectedServiceTypes = selectedItems.serviceType.map(item => item.name).join('、');
+                const serviceTypeText = selectedServiceTypes ? `服务类型: ${selectedServiceTypes}` : '服务类型: 全部';
+                
+                const pdfContainer = document.createElement('div');
+                pdfContainer.style.position = 'absolute';
+                pdfContainer.style.left = '-9999px';
+                pdfContainer.style.top = '0';
+                pdfContainer.style.width = '1100px';
+                pdfContainer.style.backgroundColor = 'white';
+                pdfContainer.style.padding = '20px';
+                pdfContainer.style.fontFamily = "'SimSun', 'STSong', 'SimHei', sans-serif";
+                
+                let tableHeader = '';
+                if (selectedItems.serviceType.length > 0) {
+                    tableHeader = `
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">名称</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">服务类型</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">工单数</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">服务记录数</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">服务记录率</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">服务人数</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">平均每单服务时长</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">平均每人每日服务时长</th>
+                        </tr>
+                    `;
+                } else {
+                    tableHeader = `
+                        <tr style="background-color: #f2f2f2;">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">名称</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">工单数</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">服务记录数</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">服务记录率</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">服务人数</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">平均每单服务时长</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">平均每人每日服务时长</th>
+                        </tr>
+                    `;
                 }
                 
-                // 格式化时长
-                const formatDuration = (minutes) => {
-                    const hours = Math.floor(minutes / 60);
-                    const mins = minutes % 60;
-                    return `${hours}小时${mins}分钟`;
-                };
-                
-                const rowData = [
-                    stat.name,
-                    stat.totalOrders.toString(),
-                    stat.serviceRecords.toString(),
-                    stat.recordRate.toFixed(1) + '%',
-                    stat.peopleCount.toString(),
-                    formatDuration(stat.avgDurationPerOrder),
-                    formatDuration(stat.avgDailyPerPersonDuration)
-                ];
-                
-                currentX = 10;
-                rowData.forEach((cell, colIndex) => {
-                    if (colIndex === 0) {
-                        doc.setFont(undefined, 'bold');
+                const tableRows = currentStats.map(stat => {
+                    const formatDuration = (minutes) => {
+                        const hours = Math.floor(minutes / 60);
+                        const mins = Math.floor(minutes % 60);
+                        return `${hours}小时${mins}分钟`;
+                    };
+                    
+                    let rateColor = '#34a853';
+                    if (stat.recordRate < 70) {
+                        rateColor = '#ea4335';
+                    } else if (stat.recordRate < 85) {
+                        rateColor = '#fbbc04';
                     }
                     
-                    doc.text(cell, currentX + 2, startY + 5.5, { maxWidth: columnWidths[colIndex] - 4 });
-                    
-                    if (colIndex === 0) {
-                        doc.setFont(undefined, 'normal');
+                    let row = '';
+                    if (selectedItems.serviceType.length > 0) {
+                        row = `
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${stat.name}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stat.serviceType}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stat.totalOrders}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stat.serviceRecords}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center; color: ${rateColor}; font-weight: bold;">${stat.recordRate.toFixed(1)}%</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stat.peopleCount}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${formatDuration(stat.avgDurationPerOrder)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${formatDuration(stat.avgDailyPerPersonDuration)}</td>
+                            </tr>
+                        `;
+                    } else {
+                        row = `
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${stat.name}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stat.totalOrders}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stat.serviceRecords}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center; color: ${rateColor}; font-weight: bold;">${stat.recordRate.toFixed(1)}%</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${stat.peopleCount}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${formatDuration(stat.avgDurationPerOrder)}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${formatDuration(stat.avgDailyPerPersonDuration)}</td>
+                            </tr>
+                        `;
                     }
-                    currentX += columnWidths[colIndex];
+                    return row;
+                }).join('');
+                
+                const pdfContent = `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h1 style="font-size: 24px; margin-bottom: 5px;">服务记录统计分析报表</h1>
+                        <p style="font-size: 14px; color: #666;">统计操作员、客户地址的服务记录情况</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px; font-size: 12px;">
+                        <p><strong>导出时间:</strong> ${new Date().toLocaleString('zh-CN')}</p>
+                        <p><strong>查询维度:</strong> ${currentQueryType === 'operator' ? '操作员' : '客户地址'}</p>
+                        <p><strong>${serviceTypeText}</strong></p>
+                        <p><strong>统计时间段:</strong> ${document.getElementById('startDate').value} 至 ${document.getElementById('endDate').value}</p>
+                    </div>
+                    
+                    <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <thead>
+                            ${tableHeader}
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 20px; font-size: 12px; color: #666;">
+                        <p>统计项数: ${currentStats.length}</p>
+                        <p>平均服务记录率: ${(currentStats.reduce((sum, stat) => sum + stat.recordRate, 0) / currentStats.length).toFixed(1)}%</p>
+                        <p>平均每单服务时长: ${(() => {
+                            const avgMinutes = currentStats.reduce((sum, stat) => sum + stat.avgDurationPerOrder, 0) / currentStats.length;
+                            const hours = Math.floor(avgMinutes / 60);
+                            const mins = Math.floor(avgMinutes % 60);
+                            return `${hours}小时${mins}分钟`;
+                        })()}</p>
+                        <p>平均每人每日服务时长: ${(() => {
+                            const avgMinutes = currentStats.reduce((sum, stat) => sum + stat.avgDailyPerPersonDuration, 0) / currentStats.length;
+                            const hours = Math.floor(avgMinutes / 60);
+                            const mins = Math.floor(avgMinutes % 60);
+                            return `${hours}小时${mins}分钟`;
+                        })()}</p>
+                    </div>
+                `;
+                
+                pdfContainer.innerHTML = pdfContent;
+                document.body.appendChild(pdfContainer);
+                
+                html2canvas(pdfContainer, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                }).then(canvas => {
+                    document.body.removeChild(pdfContainer);
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                    
+                    const pageWidth = pdf.internal.pageSize.getWidth();
+                    const imgWidth = pageWidth - 20;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
+                    
+                    const fileName = `服务记录统计_${new Date().toISOString().slice(0, 10)}.pdf`;
+                    
+                    pdf.save(fileName);
+                }).catch(error => {
+                    document.body.removeChild(pdfContainer);
+                    console.error('PDF导出错误:', error);
+                    alert('PDF导出失败: ' + error.message);
                 });
                 
-                // 绘制行分隔线
-                doc.setDrawColor(238, 238, 238);
-                doc.line(10, startY + 8, 280, startY + 8);
-                
-                startY += 8;
-            });
-            
-            // 生成文件名
-            const fileName = `服务记录统计_${new Date().toISOString().slice(0, 10)}.pdf`;
-            
-            // 保存PDF
-            doc.save(fileName);
+            } catch (error) {
+                console.error('PDF导出错误:', error);
+                alert('PDF导出失败: ' + error.message);
+            }
         }
     </script>
 </body>
