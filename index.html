@@ -55,7 +55,7 @@
             width: 380px;
             background-color: #f9fafc;
             border-right: 1px solid #eaeaea;
-            padding: 20px;
+            padding: 0;
             overflow-y: auto;
         }
         
@@ -317,9 +317,54 @@
             color: #ccc;
         }
         
+        /* 左侧边栏样式优化 - 4个维度 */
+        .dimension-group {
+            padding: 20px;
+            border-bottom: 1px solid #eaeaea;
+            background-color: white;
+        }
+        
+        .dimension-group:last-child {
+            border-bottom: none;
+        }
+        
+        .dimension-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .dimension-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .dimension-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .dimension-icon {
+            font-size: 16px;
+            margin-right: 8px;
+            color: #1a73e8;
+        }
+        
         /* 树形选择器样式 */
         .tree-selector {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         
         .tree-selector .btn {
@@ -327,6 +372,8 @@
             text-align: left;
             position: relative;
             padding-right: 40px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
         }
         
         .tree-selector .btn::after {
@@ -351,6 +398,7 @@
             max-height: 250px;
             overflow-y: auto;
             display: none;
+            border-top: 3px solid #1a73e8;
         }
         
         .tree-container.active {
@@ -487,6 +535,7 @@
             background-color: white;
             max-height: 150px;
             overflow-y: auto;
+            border-top: 3px solid #9c27b0;
         }
         
         .service-type-item {
@@ -518,8 +567,8 @@
         }
         
         .service-type-item.selected .service-type-checkbox {
-            background-color: #1a73e8;
-            border-color: #1a73e8;
+            background-color: #9c27b0;
+            border-color: #9c27b0;
         }
         
         .service-type-item.selected .service-type-checkbox::after {
@@ -530,6 +579,24 @@
         
         .service-type-text {
             flex: 1;
+        }
+        
+        /* 时间范围样式 */
+        .date-range-group {
+            margin-bottom: 16px;
+        }
+        
+        .date-range-container {
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: white;
+            border-top: 3px solid #00b894;
+        }
+        
+        /* 按钮组样式 */
+        .action-buttons-group {
+            border-top: 3px solid #e17055;
         }
         
         @media (max-width: 1200px) {
@@ -567,6 +634,15 @@
             .export-buttons {
                 flex-direction: column;
             }
+            
+            .dimension-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .dimension-number {
+                margin-bottom: 8px;
+            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -577,43 +653,91 @@
     <div class="container">
         <header>
             <h1>服务记录统计分析</h1>
-            <p>统计操作员、客户地址的服务记录情况</p>
+            <p>统计服务记录情况</p>
         </header>
         
         <div class="main-content">
             <div class="sidebar">
-                <h2 class="section-title">统计条件设置</h2>
-                
-                <div class="tree-selector">
-                    <button class="btn btn-secondary" onclick="toggleTree('address')" id="addressBtn">选择网格地址</button>
-                    <div class="tree-container" id="addressTree"></div>
-                    <div class="selected-tags" id="addressTags"></div>
-                </div>
-                
-                <div class="tree-selector">
-                    <button class="btn btn-secondary" onclick="toggleTree('operator')" id="operatorBtn">选择操作员</button>
-                    <div class="tree-container" id="operatorTree"></div>
-                    <div class="selected-tags" id="operatorTags"></div>
-                </div>
-                
-                <div class="service-type-group">
-                    <div class="service-type-title">服务类型选择</div>
-                    <div class="service-type-container" id="serviceTypeContainer"></div>
-                    <div class="selected-tags" id="serviceTypeTags"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="dateRange">统计时间段</label>
-                    <div class="date-range-row">
-                        <input type="date" id="startDate" class="form-control" value="2025-12-01">
-                        <span>至</span>
-                        <input type="date" id="endDate" class="form-control" value="2025-12-01">
+                <!-- 维度1: 部门或网格 -->
+                <div class="dimension-group">
+                    <div class="dimension-header">
+                        <div class="dimension-number">1</div>
+                        <div class="dimension-title">
+                            <span class="dimension-icon">📍</span>
+                            部门或网格
+                        </div>
+                    </div>
+                    
+                    <div class="tree-selector">
+                        <button class="btn btn-secondary" onclick="toggleTree('address')" id="addressBtn">选择部门或网格</button>
+                        <div class="tree-container" id="addressTree"></div>
+                        <div class="selected-tags" id="addressTags"></div>
                     </div>
                 </div>
                 
-                <div class="button-group">
-                    <button class="btn btn-primary btn-block" onclick="queryStatistics()">查询统计</button>
-                    <button class="btn btn-secondary btn-block" onclick="resetForm()">重置所有条件</button>
+                <!-- 维度2: 操作员选择 -->
+                <div class="dimension-group">
+                    <div class="dimension-header">
+                        <div class="dimension-number">2</div>
+                        <div class="dimension-title">
+                            <span class="dimension-icon">👤</span>
+                            操作员
+                        </div>
+                    </div>
+                    
+                    <div class="tree-selector">
+                        <button class="btn btn-secondary" onclick="toggleTree('operator')" id="operatorBtn">选择操作员</button>
+                        <div class="tree-container" id="operatorTree"></div>
+                        <div class="selected-tags" id="operatorTags"></div>
+                    </div>
+                </div>
+                
+                <!-- 维度3: 服务类型选择 -->
+                <div class="dimension-group">
+                    <div class="dimension-header">
+                        <div class="dimension-number">3</div>
+                        <div class="dimension-title">
+                            <span class="dimension-icon">🛠️</span>
+                            服务类型
+                        </div>
+                    </div>
+                    
+                    <div class="service-type-group">
+                        <div class="service-type-container" id="serviceTypeContainer"></div>
+                        <div class="selected-tags" id="serviceTypeTags"></div>
+                    </div>
+                </div>
+                
+                <!-- 维度4: 时间范围 -->
+                <div class="dimension-group">
+                    <div class="dimension-header">
+                        <div class="dimension-number">4</div>
+                        <div class="dimension-title">
+                            <span class="dimension-icon">📅</span>
+                            时间范围
+                        </div>
+                    </div>
+                    
+                    <div class="date-range-group">
+                        <div class="date-range-container">
+                            <div class="form-group">
+                                <label for="dateRange">统计时间段</label>
+                                <div class="date-range-row">
+                                    <input type="date" id="startDate" class="form-control" value="2025-12-01">
+                                    <span>至</span>
+                                    <input type="date" id="endDate" class="form-control" value="2025-12-01">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="dimension-group action-buttons-group">
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-block" onclick="queryStatistics()">查询统计</button>
+                        <button class="btn btn-secondary btn-block" onclick="resetForm()">重置所有条件</button>
+                    </div>
                 </div>
             </div>
             
@@ -803,7 +927,7 @@
             
             const addressTree = document.getElementById('addressTree');
             addressTree.innerHTML = generateTreeHTML(organizationalStructure.addresses, 'address');
-            document.getElementById('addressBtn').textContent = `选择网格地址 (${selectedItems.address.length}项)`;
+            document.getElementById('addressBtn').textContent = `选择部门或网格 (${selectedItems.address.length}项)`;
             
             updateSelectedTags();
         }
@@ -1005,7 +1129,7 @@
         function getTypeName(type) {
             const names = {
                 operator: '操作员',
-                address: '客户地址',
+                address: '部门或网格',
                 serviceType: '服务类型'
             };
             return names[type] || type;
@@ -1542,7 +1666,7 @@
                 const pdfContent = `
                     <div style="text-align: center; margin-bottom: 20px;">
                         <h1 style="font-size: 24px; margin-bottom: 5px;">服务记录统计分析报表</h1>
-                        <p style="font-size: 14px; color: #666;">统计操作员、客户地址的服务记录情况</p>
+                        <p style="font-size: 14px; color: #666;">统计服务记录情况</p>
                     </div>
                     
                     <div style="margin-bottom: 20px; font-size: 12px;">
