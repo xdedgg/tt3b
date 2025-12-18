@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>服务记录统计分析</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         * {
             margin: 0;
@@ -335,30 +336,19 @@
             position: relative;
         }
         
-        .dimension-number {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 24px;
-            height: 24px;
-            background-color: #1a73e8;
-            color: white;
-            border-radius: 50%;
-            font-size: 12px;
-            font-weight: 600;
-            margin-right: 10px;
-            flex-shrink: 0;
-        }
-        
         .dimension-title {
             font-size: 15px;
             font-weight: 600;
             color: #333;
+            display: flex;
+            align-items: center;
         }
         
-        .dimension-icon {
-            font-size: 16px;
+        .mr-2 {
             margin-right: 8px;
+        }
+        
+        .text-primary {
             color: #1a73e8;
         }
         
@@ -639,10 +629,6 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
-            .dimension-number {
-                margin-bottom: 8px;
-            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -661,9 +647,8 @@
                 <!-- 维度1: 部门或网格 -->
                 <div class="dimension-group">
                     <div class="dimension-header">
-                        <div class="dimension-number">1</div>
                         <div class="dimension-title">
-                            <span class="dimension-icon">📍</span>
+                            <i class="fa fa-building-o mr-2 text-primary"></i>
                             部门或网格
                         </div>
                     </div>
@@ -678,9 +663,8 @@
                 <!-- 维度2: 操作员选择 -->
                 <div class="dimension-group">
                     <div class="dimension-header">
-                        <div class="dimension-number">2</div>
                         <div class="dimension-title">
-                            <span class="dimension-icon">👤</span>
+                            <i class="fa fa-user-o mr-2 text-primary"></i>
                             操作员
                         </div>
                     </div>
@@ -695,9 +679,8 @@
                 <!-- 维度3: 服务类型选择 -->
                 <div class="dimension-group">
                     <div class="dimension-header">
-                        <div class="dimension-number">3</div>
                         <div class="dimension-title">
-                            <span class="dimension-icon">🛠️</span>
+                            <i class="fa fa-cogs mr-2 text-primary"></i>
                             服务类型
                         </div>
                     </div>
@@ -711,9 +694,8 @@
                 <!-- 维度4: 时间范围 -->
                 <div class="dimension-group">
                     <div class="dimension-header">
-                        <div class="dimension-number">4</div>
                         <div class="dimension-title">
-                            <span class="dimension-icon">📅</span>
+                            <i class="fa fa-calendar mr-2 text-primary"></i>
                             时间范围
                         </div>
                     </div>
